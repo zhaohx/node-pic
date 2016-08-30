@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script type="text/javascript" src="js/upload.js"></script>
+<style type="text/css">
+#canvas{ border:1px solid #ccc;}
+</style>
+</head>
+
+<body>
+<div id="underwrite"></div>
+<button id="btn_clear">清除</button>
+<button id="btn_submit">提交</button>
+
+<div class="upload">
+    <div class="upload-btn" data-role="upBtn" enctype="multipart/form-data">
+        <input type="button" class="btn-photo"  data-role="upfile" value="上传图片"/>
+    </div>
+
+    <ul class="upload-box" data-role="upBox">
+    <li>
+        <span class="btn-file">
+            <input data-role="file" type="file" class="ufile" id="file" name="file" multiple onChange="change()"/>
+            <a data-role="addImg" class="addImg">+</a>
+        </span>
+    </li>
+    </ul>
+
+    <div class="upload-text">您已上传<span data-role="num"></span>个文件。</div>
+</div>
+<script language="javascript">
+function change(){
+  console.log(document.getElementById("file").files)
+}
+var underwrite = document.getElementById('underwrite');
+var canvas = document.createElement('canvas');
+var canvasWidth = 600, canvasHeight=400;
+var point = {};
+point.notFirst = false;
+
+canvas.setAttribute('width', canvasWidth);
+canvas.setAttribute('height', canvasHeight);
+canvas.setAttribute('id', 'canvas');
+underwrite.appendChild(canvas);
+
+if(typeof G_vmlCanvasManager != 'undefined') {
+
+	canvas = G_vmlCanvasManager.initElement(canvas);
+}
+var context = canvas.getContext("2d");
+
+
+canvas.addEventListener("mousedown", function(e){
+  var mouseX = e.pageX - this.offsetLeft;
+  var mouseY = e.pageY - this.offsetTop;
+  paint = true;
+  addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+  redraw();
+});
+
+canvas.addEventListener("mousemove", function(e){
+  if(paint){
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+    redraw();
+  }
+});
+
+canvas.addEventListener("mouseup", function(e){
+  paint = false;
+});
+
+canvas.addEventListener("mouseleave", function(e){
+  paint = false;
+});
+
+var clickX = new Array();
+var clickY = new Array();
+var clickDrag = new Array();
+var paint;
+
+function addClick(x, y, dragging)
+{
+  clickX.push(x);
+  clickY.push(y);
+  clickDrag.push(dragging);
+}
+
+function redraw(){
+  //canvas.width = canvas.width; // Clears the canvas
+
+  context.strokeStyle = "#df4b26";
+  context.lineJoin = "round";
+  context.lineWidth = 5;
+
+  while (clickX.length > 0 ) {
+	  point.bx = point.x;
+	  point.by = point.y;
+	  point.x = clickX.pop();
+	  point.y = clickY.pop();
+	  point.drag = clickDrag.pop();
+	  context.beginPath();
+	  if (point.drag && point.notFirst) {
+		  context.moveTo(point.bx, point.by);
+	  } else {
+		  point.notFirst = true;
+		  context.moveTo(point.x - 1, point.y);
+	  }
+     context.lineTo(point.x, point.y);
+     context.closePath();
+     context.stroke();
+  }
+/*
+  for(var i=0; i < clickX.length; i++)
+  {
+    context.beginPath();
+    if(clickDrag[i] && i){
+      context.moveTo(clickX[i-1], clickY[i-1]);
+     }else{
+       context.moveTo(clickX[i]-1, clickY[i]);
+     }
+     context.lineTo(clickX[i], clickY[i]);
+     context.closePath();
+     context.stroke();
+  }
+  */
+}
+var clear = document.getElementById("btn_clear");
+var submit = document.getElementById("btn_submit");
+clear.addEventListener("click", function(){
+	canvas.width = canvas.width;
+});
+
+submit.addEventListener("click", function(){
+	console.log(canvas.toDataURL("image/png"));
+  var img = canvas.toDataURL("image/png")
+  console.log(upload)
+  upload.prototype.ajaxUp(img, function(){
+    alert("done")
+  })
+});
+</script>
+</body>
+</html>
